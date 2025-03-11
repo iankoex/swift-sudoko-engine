@@ -8,17 +8,17 @@ let package = Package(
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "swift-suduko-engine",
-            targets: ["swift-suduko-engine"]),
+            name: "SudukoEngine",
+            targets: ["SudukoEngine"]),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "swift-suduko-engine"),
+            name: "SudukoEngine"),
         .testTarget(
-            name: "swift-suduko-engineTests",
-            dependencies: ["swift-suduko-engine"]
+            name: "SudukoEngineTests",
+            dependencies: ["SudukoEngine"]
         ),
     ]
 )
