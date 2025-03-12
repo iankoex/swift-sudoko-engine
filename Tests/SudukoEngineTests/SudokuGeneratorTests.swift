@@ -9,7 +9,7 @@ import Testing
 @testable import SudukoEngine
 import Foundation
 
-@Suite("Sudoku Generator ")
+@Suite("Sudoku Generator")
 class SudokuGeneratorTests {
 
     // MARK: - 1. Verify Unique Solution for Each Difficulty

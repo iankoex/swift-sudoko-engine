@@ -55,3 +55,9 @@ public extension Sudoku.SudokuGrid {
         }
     }
 }
+
+extension Sudoku.SudokuGrid.Cell: Identifiable {
+    public var id: String {
+        return column.appending(row)
+    }
+}

@@ -100,3 +100,9 @@ public extension Sudoku {
         }
     }
 }
+
+extension Sudoku.SudokuGrid: Identifiable {
+    public var id: Int {
+        position
+    }
+}
