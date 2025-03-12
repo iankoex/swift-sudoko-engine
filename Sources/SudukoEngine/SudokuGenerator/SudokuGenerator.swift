@@ -5,87 +5,55 @@
 //  Created by ian on 11/03/2025.
 //
 
-import Foundation
-
-// MARK: - Difficulty Level Enum
-
-/// The level of difficulty for a Sudoku puzzle.
-public enum Difficulty {
-    case easy
-    case medium
-    case hard
-
-    /// The number of cells to remove according to the difficulty.
-    var removalCount: Int {
-        switch self {
-            case .easy:
-                return 30  // fewer cells removed: more givens
-            case .medium:
-                return 40
-            case .hard:
-                return 50  // more cells removed: fewer givens
-        }
-    }
-
-    /// An optional factor for symmetry (not used directly in removalRate but can be used to guide removal for symmetry).
-    var symmetry: Bool {
-        return true
-    }
-}
 
 // MARK: - Sudoku Generator
 
-/// A class that generates Sudoku puzzles asynchronously according to a given difficulty.
+/// A class responsible for generating Sudoku puzzles asynchronously based on a specified difficulty level.
 ///
-/// This generator:
-/// • Generates a fully solved puzzle using backtracking.
-/// • Removes cells from the solved puzzle based on the chosen difficulty (while maintaining symmetry).
-/// • Ensures a unique solution: when attempting to remove a cell the generator first checks if the puzzle
-///   still has only one solution. If not, the candidate cells are marked as non-removable.
+/// The functionality of this generator includes:
+/// 1. Fully Solved Puzzle Generation:
+///    - Generates a complete, valid Sudoku board using a backtracking algorithm.
+///    - The board is initially populated with zeroes and then solved by recursively placing numbers,
+///      ensuring every placement is valid with respect to Sudoku rules.
+/// 2. Clue Removal with Controlled Difficulty:
+///    - After generating a complete solution, the generator removes a predetermined number of cells
+///      (i.e., clues) based on the chosen difficulty level (e.g., easy, medium, or hard).
+///    - The removal process preserves board symmetry for visual consistency.
+/// 3. Unique Solution Guarantee:
+///    - During cell removal, each deletion is verified by checking that the resulting puzzle still has
+///      exactly one solution.
+///    - If removing a candidate cell (or pair of symmetric cells) leads to multiple solutions, those cells
+///      are marked as non-removable.
+///    - This step guarantees that each generated puzzle is uniquely solvable.
+///
+/// The overall process ensures that the generated Sudoku puzzle is not only challenging based on the number
+/// of clues provided but also adheres to classic Sudoku rules with a single valid solution.
+///
 public class SudokuGenerator {
 
     /// Generates a complete Sudoku puzzle asynchronously.
     /// - Parameter difficulty: The difficulty level (easy, medium, or hard) determining how many cells will be removed.
     /// - Returns: A Sudoku puzzle with a unique solution that adheres to design qualities.
-    public func generateSudoku(difficulty: Difficulty) async throws -> Sudoku {
+    public static func generate(difficulty: Sudoku.Difficulty) async throws -> (puzzle: Sudoku, solved: Sudoku) {
         // Step 1: Generate a completely solved puzzle.
         let solvedSudoku = try await generateSolvedSudoku()
-        print("Solved Sudoku:")
-        print(solvedSudoku)
 
         // Step 2: Remove cells according to difficulty while preserving symmetry and uniqueness.
-        let puzzle = try await removeCells(from: solvedSudoku, removalCount: difficulty.removalCount)
+        var puzzle = try await removeCells(from: solvedSudoku, removalCount: difficulty.removalCount)
+        puzzle.difficulty = difficulty
 
-        return puzzle
+        return (puzzle, solvedSudoku)
     }
+}
 
-    // MARK: - Private Helper Methods
+// MARK: - Public Helper Methods
 
+extension SudokuGenerator {
     /// Asynchronously generates a complete solved Sudoku puzzle using backtracking.
     /// - Returns: A fully solved Sudoku puzzle.
-    private func generateSolvedSudoku() async throws -> Sudoku {
+    public static func generateSolvedSudoku() async throws -> Sudoku {
         // Create a 9x9 board filled with 0s for backtracking.
         var board = [[Int]](repeating: [Int](repeating: 0, count: 9), count: 9)
-
-        /// Checks whether placing a number is valid.
-        func isValid(_ board: [[Int]], row: Int, col: Int, num: Int) -> Bool {
-            // Check the row and column.
-            for i in 0..<9 {
-                if board[row][i] == num || board[i][col] == num {
-                    return false
-                }
-            }
-            // Check the 3x3 sub-grid.
-            let startRow = row - row % 3, startCol = col - col % 3
-            for i in 0..<3 {
-                for j in 0..<3 {
-                    if board[startRow + i][startCol + j] == num {
-                        return false
-                    }
-                }
-            }
-            return true
-        }
 
         /// Backtracking solver function.
         func solve(_ board: inout [[Int]], row: Int, col: Int) -> Bool {
@@ -112,7 +80,7 @@ public class SudokuGenerator {
 
         // Solve the board.
         guard solve(&board, row: 0, col: 0) else {
-            throw NSError(domain: "SudokuGenerator", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to generate a solved Sudoku board."])
+            throw SudokuError.generationFailure
         }
 
         // Convert the 2D board back into a Sudoku structure.
@@ -121,7 +89,7 @@ public class SudokuGenerator {
             let grid = try Sudoku.SudokuGrid.createEmpty(position: gridPos)
             newGrids.append(grid)
         }
-        var newSudoku = try Sudoku(grid: newGrids)
+        var newSudoku = try Sudoku(grid: newGrids, difficulty: .easy)
 
         // Map each number from the board to the corresponding cell in newSudoku.
         for row in 0..<9 {
@@ -141,62 +109,11 @@ public class SudokuGenerator {
 
         return newSudoku
     }
+}
 
-    /// Counts the number of solutions for a given board using a modified backtracking algorithm.
-    ///
-    /// - Parameters:
-    ///   - board: A 9x9 Sudoku board represented as a 2D array of Int (where 0 represents an empty cell).
-    ///   - limit: The maximum number of solutions to search for (default 2).
-    /// - Returns: The number of solutions found (up to the limit).
-    private func countSolutions(for board: inout [[Int]], limit: Int = 2) -> Int {
-        var solutionCount = 0
+// MARK: - Private Helper Methods
 
-        /// Checks if placing a number is valid (repeated here in the closure).
-        func isValid(_ board: [[Int]], row: Int, col: Int, num: Int) -> Bool {
-            for i in 0..<9 {
-                if board[row][i] == num || board[i][col] == num {
-                    return false
-                }
-            }
-            let startRow = row - row % 3, startCol = col - col % 3
-            for i in 0..<3 {
-                for j in 0..<3 {
-                    if board[startRow + i][startCol + j] == num {
-                        return false
-                    }
-                }
-            }
-            return true
-        }
-
-        /// The recursive backtracking function that counts solutions.
-        func solve(_ board: inout [[Int]], row: Int, col: Int) {
-            if solutionCount >= limit { return }
-            if row == 9 {
-                solutionCount += 1
-                return
-            }
-
-            let nextRow = col == 8 ? row + 1 : row
-            let nextCol = (col + 1) % 9
-
-            if board[row][col] != 0 {
-                solve(&board, row: nextRow, col: nextCol)
-                return
-            }
-
-            for num in 1...9 {
-                if isValid(board, row: row, col: col, num: num) {
-                    board[row][col] = num
-                    solve(&board, row: nextRow, col: nextCol)
-                    board[row][col] = 0
-                }
-            }
-        }
-
-        solve(&board, row: 0, col: 0)
-        return solutionCount
-    }
+private extension SudokuGenerator {
 
     /// Asynchronously removes cells from a solved Sudoku board to create a puzzle.
     ///
@@ -208,7 +125,7 @@ public class SudokuGenerator {
     ///   - sudoku: A fully solved Sudoku puzzle.
     ///   - removalCount: The total number of cells to remove.
     /// - Returns: A modified Sudoku puzzle with removed cells (set to 0) that has a unique solution.
-    private func removeCells(from sudoku: Sudoku, removalCount: Int) async throws -> Sudoku {
+    private static func removeCells(from sudoku: Sudoku, removalCount: Int) async throws -> Sudoku {
         // Copy the solved puzzle.
         var puzzle = sudoku
 
