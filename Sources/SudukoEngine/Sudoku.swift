@@ -10,7 +10,7 @@
 /// A standard Sudoku puzzle is composed of 9 distinct grids (often
 /// visualized as 3x3 boxes). Each grid contains 9 cells, and the entire puzzle
 /// must satisfy the rules of Sudoku.
-public struct Sudoku {
+public struct Sudoku: Sendable {
 
     /// The collection of 9 grids that make up the complete Sudoku puzzle.
     /// Each grid holds a subset of cells corresponding to one of the nine boxes.

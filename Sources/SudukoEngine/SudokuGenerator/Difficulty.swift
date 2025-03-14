@@ -10,7 +10,7 @@
 
 extension Sudoku {
     /// The level of difficulty for a Sudoku puzzle.
-    public enum Difficulty {
+    public enum Difficulty: Sendable {
         case easy
         case medium
         case hard
