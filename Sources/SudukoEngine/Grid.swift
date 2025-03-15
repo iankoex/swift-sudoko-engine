@@ -101,7 +101,17 @@ public extension Sudoku {
     }
 }
 
+/// Extends the SudokuGrid type to conform to the Identifiable protocol.
+///
+/// This conformance uses the grid's `position` property as the unique
+/// identifier. In a standard Sudoku puzzle, each grid (or 3x3 block) is
+/// assigned a unique position (from 1 to 9), which ensures that each grid
+/// instance can be uniquely identified.
+///
+/// For example, the grid representing the top-left block would have a position
+/// of 1, and thus an identifier of 1.
 extension Sudoku.SudokuGrid: Identifiable {
+    /// A unique identifier for the Sudoku grid, derived from its position within the Sudoku puzzle.
     public var id: Int {
         position
     }

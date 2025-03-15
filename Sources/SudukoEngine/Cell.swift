@@ -56,7 +56,19 @@ public extension Sudoku.SudokuGrid {
     }
 }
 
+/// Extends the SudokuGrid.Cell type to conform to the Identifiable protocol.
+///
+/// This conformance provides a unique identifier for each cell by concatenating
+/// its column and row values. Since a valid cell always has a column (A-I)
+/// and a row (1-9), this combination is unique throughout the Sudoku puzzle.
+///
+/// For example, a cell with column "A" and row "1" will have an identifier "A1".
 extension Sudoku.SudokuGrid.Cell: Identifiable {
+    /// A unique identifier for the cell.
+    ///
+    /// The identifier is constructed by appending the cell's row identifier to its column
+    /// identifier. For instance, for a cell with column "C" and row "5", the unique ID
+    /// would be "C5".
     public var id: String {
         return column.appending(row)
     }
