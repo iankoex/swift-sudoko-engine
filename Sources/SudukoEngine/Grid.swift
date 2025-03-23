@@ -11,7 +11,7 @@ public extension Sudoku {
 
     /// A structure representing one of the 9 boxes or regions in a Sudoku puzzle.
     /// Each grid corresponds to a 3x3 region and holds 9 cells.
-    struct SudokuGrid: Sendable {
+    struct SudokuGrid: Sendable, Equatable {
         /// The position of this grid in the overall Sudoku puzzle (1-9).
         /// The grids are numbered from left to right, top to bottom as follows:
         /// 1 2 3

@@ -10,7 +10,7 @@
 
 extension Sudoku {
     /// The level of difficulty for a Sudoku puzzle.
-    public enum Difficulty: Sendable {
+    public enum Difficulty: Sendable, CaseIterable {
         case easy
         case medium
         case hard
@@ -31,5 +31,32 @@ extension Sudoku {
         var symmetry: Bool {
             return true
         }
+    }
+}
+
+extension Sudoku.Difficulty: CustomStringConvertible {
+    /// A human-readable description of the difficulty level.
+    ///
+    /// - Returns: A `String` representing the difficulty level in a user-friendly format.
+    ///   For example, "Easy", "Medium", or "Hard".
+    public var description: String {
+        switch self {
+            case .easy:
+                return "Easy"
+            case .medium:
+                return "Medium"
+            case .hard:
+                return "Hard"
+        }
+    }
+}
+
+extension Sudoku.Difficulty: Identifiable {
+    /// A unique identifier for each difficulty level.
+    ///
+    /// - Returns: A `String` identifier that uses the description of the difficulty.
+    ///   This ensures that each difficulty level (Easy, Medium, Hard) has a unique, human-readable ID.
+    public var id: String {
+        return self.description
     }
 }

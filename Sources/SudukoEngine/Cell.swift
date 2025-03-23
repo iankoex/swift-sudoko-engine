@@ -10,7 +10,7 @@ public extension Sudoku.SudokuGrid {
 
     /// A structure representing an individual cell within a Sudoku grid.
     /// Each cell is identified by its column (A-I) and row (1-9) and holds a numeric value.
-    struct Cell: Sendable {
+    struct Cell: Sendable, Equatable {
         /// The column identifier for this cell in the overall Sudoku puzzle (A-I).
         public var column: String
 
