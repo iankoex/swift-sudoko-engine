@@ -110,7 +110,7 @@ public extension Sudoku {
 ///
 /// For example, the grid representing the top-left block would have a position
 /// of 1, and thus an identifier of 1.
-extension Sudoku.SudokuGrid: Identifiable {
+extension Sudoku.SudokuGrid: Identifiable, Hashable {
     /// A unique identifier for the Sudoku grid, derived from its position within the Sudoku puzzle.
     public var id: Int {
         position

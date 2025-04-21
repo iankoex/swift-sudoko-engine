@@ -63,7 +63,7 @@ public extension Sudoku.SudokuGrid {
 /// and a row (1-9), this combination is unique throughout the Sudoku puzzle.
 ///
 /// For example, a cell with column "A" and row "1" will have an identifier "A1".
-extension Sudoku.SudokuGrid.Cell: Identifiable {
+extension Sudoku.SudokuGrid.Cell: Identifiable, Hashable {
     /// A unique identifier for the cell.
     ///
     /// The identifier is constructed by appending the cell's row identifier to its column
